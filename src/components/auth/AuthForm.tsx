@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-export function AuthForm() {
+interface AuthFormProps {
+  onSuccess?: () => void;
+}
+
+export function AuthForm({ onSuccess }: AuthFormProps = {}) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,6 +27,10 @@ export function AuthForm() {
         await signIn(email, password);
       } else {
         await signUp(email, password);
+      }
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
