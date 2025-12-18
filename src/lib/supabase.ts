@@ -7,8 +7,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type UserProfile = {
   id: string;
-  email: string;
   credits: number;
   is_pro: boolean;
+  stripe_customer_id?: string;
   created_at: string;
+  updated_at?: string;
 };

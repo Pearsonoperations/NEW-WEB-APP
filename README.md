@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔥 Roast App
 
-## Getting Started
+A Next.js app that roasts users with AI-generated insults. Features authentication, credit system, and Stripe payments.
 
-First, run the development server:
+## ✨ Features
+
+- **Authentication** - Email/password login with Supabase
+- **Password Toggle** - Eye icon to show/hide password
+- **Credit System** - 3 free credits, 100 credits for Pro (£9.99/month)
+- **Stripe Payments** - Secure checkout and subscription management
+- **Animated Background** - Moving sparkles effect
+- **Share Functionality** - Share roasts via Web Share API or clipboard
+- **Responsive Design** - Works on mobile and desktop
+
+## 🚀 Quick Start
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Set up environment variables
+cp .env.local.example .env.local
+# Edit .env.local with your keys
+
+# 3. Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 4. Open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📚 Documentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **[QUICK_START.md](./QUICK_START.md)** - Quick setup guide
+- **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** - Supabase configuration
+- **[STRIPE_SETUP.md](./STRIPE_SETUP.md)** - Stripe integration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Environment Variables
 
-## Learn More
+You need to set up 6 environment variables:
 
-To learn more about Next.js, take a look at the following resources:
+### Supabase
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Public anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (server-side only)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Stripe
+- `STRIPE_SECRET_KEY` - Stripe secret key
+- `NEXT_PUBLIC_STRIPE_PRICE_ID` - Your product price ID
+- `STRIPE_WEBHOOK_SECRET` - Webhook signing secret
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `.env.local.example` for the template.
 
-## Deploy on Vercel
+## 🏗️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Framework**: Next.js 15 with App Router
+- **Styling**: Tailwind CSS
+- **Authentication**: Supabase Auth
+- **Database**: Supabase (PostgreSQL)
+- **Payments**: Stripe
+- **Animations**: Framer Motion, tsparticles
+- **Icons**: Lucide React
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── checkout/route.ts    # Create Stripe checkout session
+│   │   └── webhook/route.ts     # Handle Stripe webhooks
+│   ├── layout.tsx               # Root layout with AuthProvider
+│   └── page.tsx                 # Main app with roast button
+├── components/
+│   ├── auth/
+│   │   └── AuthForm.tsx         # Login/signup form
+│   └── ui/
+│       └── sparkles.tsx         # Animated sparkles background
+├── contexts/
+│   └── AuthContext.tsx          # Authentication state management
+└── lib/
+    ├── stripe.ts                # Stripe client configuration
+    ├── supabase.ts              # Supabase client configuration
+    └── utils.ts                 # Utility functions
+```
+
+## 🎯 How It Works
+
+### Free Users
+1. Sign up with email and password
+2. Get 3 free credits
+3. Click "ROAST ME" to get roasted (uses 1 credit)
+4. When credits run out, see upgrade modal
+
+### Pro Users (£9.99/month)
+1. Click "Upgrade to Pro" when out of credits
+2. Complete Stripe checkout
+3. Get 100 credits
+4. Credits reset monthly
+5. Cancel anytime
+
+## 🧪 Testing
+
+### Test Locally
+```bash
+# Terminal 1: Run dev server
+npm run dev
+
+# Terminal 2: Forward webhooks
+stripe listen --forward-to localhost:3000/api/webhook
+```
+
+### Test Cards
+- **Success**: `4242 4242 4242 4242`
+- **Declined**: `4000 0000 0000 0002`
+- **3D Secure**: `4000 0025 0000 3155`
+
+Use any future expiry date, any 3-digit CVC, any postal code.
+
+## 🚢 Deployment
+
+### Deploy to Vercel
+
+1. Push to GitHub
+2. Import in Vercel
+3. Add environment variables
+4. Deploy
+5. Set up Stripe webhook with production URL
+
+```bash
+git add .
+git commit -m "Add authentication and payment"
+git push
+```
+
+### Webhook Endpoint
+Production: `https://your-domain.vercel.app/api/webhook`
+
+## 📊 Database Schema
+
+### `profiles` table
+```sql
+id UUID PRIMARY KEY (references auth.users)
+email TEXT NOT NULL
+credits INTEGER DEFAULT 3
+is_pro BOOLEAN DEFAULT FALSE
+created_at TIMESTAMP DEFAULT NOW()
+```
+
+## 🔐 Security
+
+- Row Level Security (RLS) enabled on Supabase
+- Webhook signature verification
+- Environment variables for secrets
+- Service role key used only server-side
+- HTTPS enforced on production
+
+## 📝 License
+
+MIT
+
+## 🤝 Contributing
+
+Feel free to submit issues and pull requests!
+
+## 📧 Support
+
+For issues, check the documentation:
+- [Quick Start Guide](./QUICK_START.md)
+- [Supabase Setup](./SUPABASE_SETUP.md)
+- [Stripe Setup](./STRIPE_SETUP.md)
