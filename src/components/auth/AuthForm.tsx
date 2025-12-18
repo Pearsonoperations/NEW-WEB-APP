@@ -25,7 +25,13 @@ export function AuthForm() {
         await signUp(email, password);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      if (errorMessage.includes('already registered')) {
+        setError('This email is already registered. Try signing in instead.');
+        setIsLogin(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -97,14 +103,17 @@ export function AuthForm() {
       </form>
 
       <div className="mt-6 text-center">
+        <span className="text-white/60 text-sm">
+          {isLogin ? "Don't have an account? " : 'Already have an account? '}
+        </span>
         <button
           onClick={() => {
             setIsLogin(!isLogin);
             setError('');
           }}
-          className="text-white/60 hover:text-white transition-colors text-sm"
+          className="text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
         >
-          {isLogin ? "Don&apos;t have an account? Sign up" : 'Already have an account? Sign in'}
+          {isLogin ? 'Sign up' : 'Sign in'}
         </button>
       </div>
     </div>

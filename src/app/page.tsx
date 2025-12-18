@@ -9,24 +9,24 @@ import { LogOut, Crown } from 'lucide-react';
 
 const roasts = [
   "You bring everyone together… by leaving the room.",
-  "You don&apos;t need enemies. Your decisions do enough damage.",
-  "I&apos;ve analyzed your potential. Results inconclusive.",
-  "You&apos;re proof that participation trophies were a mistake.",
+  "You don't need enemies. Your decisions do enough damage.",
+  "I've analyzed your potential. Results inconclusive.",
+  "You're proof that participation trophies were a mistake.",
   "Your fashion sense is so unique… like a cry for help.",
-  "You&apos;re like a software update. Nobody wants you, but you show up anyway.",
-  "I&apos;d agree with you, but then we&apos;d both be wrong.",
-  "You&apos;re not stupid. You just have bad luck when thinking.",
-  "If I wanted to hear from you, I&apos;d read your error logs.",
-  "You&apos;re like a cloud. When you disappear, it&apos;s a beautiful day.",
+  "You're like a software update. Nobody wants you, but you show up anyway.",
+  "I'd agree with you, but then we'd both be wrong.",
+  "You're not stupid. You just have bad luck when thinking.",
+  "If I wanted to hear from you, I'd read your error logs.",
+  "You're like a cloud. When you disappear, it's a beautiful day.",
   "Your code works? Must be a cosmic accident.",
-  "You&apos;re living proof that evolution can go in reverse.",
-  "I&apos;d explain it to you, but I left my crayons at home.",
-  "You&apos;re not lazy. You&apos;re just highly motivated to do nothing.",
+  "You're living proof that evolution can go in reverse.",
+  "I'd explain it to you, but I left my crayons at home.",
+  "You're not lazy. You're just highly motivated to do nothing.",
   "Your ideas are like pop-up ads. Unwanted and easily blocked.",
   "You peaked in the tutorial.",
-  "You&apos;re like a broken pencil… pointless.",
-  "I&apos;ve seen better decision-making from a Magic 8-Ball.",
-  "You&apos;re the human equivalent of a loading screen.",
+  "You're like a broken pencil… pointless.",
+  "I've seen better decision-making from a Magic 8-Ball.",
+  "You're the human equivalent of a loading screen.",
   "Your potential is like dark matter. Theoretically there, but undetectable."
 ];
 
@@ -36,6 +36,7 @@ export default function Home() {
   const [intensity, setIntensity] = useState<'mild' | 'savage'>('mild');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const getRandomRoast = () => {
     const randomIndex = Math.floor(Math.random() * roasts.length);
@@ -75,6 +76,37 @@ export default function Home() {
     } else if (currentRoast) {
       navigator.clipboard.writeText(`🔥 I got roasted: "${currentRoast}" 🔥`);
       alert('Roast copied to clipboard!');
+    }
+  };
+
+  const handleUpgrade = async () => {
+    if (!user) return;
+
+    setUpgradeLoading(true);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      const { url, error } = await response.json();
+
+      if (error) {
+        alert('Error creating checkout session. Please try again.');
+        return;
+      }
+
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setUpgradeLoading(false);
     }
   };
 
@@ -181,12 +213,11 @@ export default function Home() {
               <p className="text-center text-white/80">100 credits monthly</p>
             </div>
             <button
-              onClick={() => {
-                alert('Payment integration coming soon!');
-              }}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-lg transition-colors mb-4"
+              onClick={handleUpgrade}
+              disabled={upgradeLoading}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 text-white font-bold py-4 rounded-lg transition-colors mb-4"
             >
-              Upgrade to Pro
+              {upgradeLoading ? 'Loading...' : 'Upgrade to Pro'}
             </button>
             <button
               onClick={() => setShowUpgrade(false)}
@@ -209,7 +240,7 @@ export default function Home() {
               isAnimating ? 'scale-110 opacity-100' : 'scale-100 opacity-90'
             }`}
           >
-            &ldquo;{currentRoast}&rdquo;
+{currentRoast}
           </div>
         )}
 

@@ -80,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id,
-        email: data.user.email,
         credits: 3,
         is_pro: false,
       });
