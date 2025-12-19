@@ -10,7 +10,9 @@ type AuthContextType = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
 
@@ -79,13 +81,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Profile will be created automatically by database trigger
   };
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}`,
+      },
+    });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile }}
+      value={{ user, profile, loading, signIn, signUp, signInWithGoogle, signOut, resetPassword, refreshProfile }}
     >
       {children}
     </AuthContext.Provider>
