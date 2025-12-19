@@ -51,11 +51,44 @@ export default function Home() {
 
   // Handle redirect to checkout after signup
   useEffect(() => {
-    if (shouldRedirectToCheckout && user && !loading) {
-      setShouldRedirectToCheckout(false);
-      handleUpgrade();
-    }
-  }, [shouldRedirectToCheckout, user, loading]);
+    const redirectToCheckout = async () => {
+      if (shouldRedirectToCheckout && user && !loading && profile) {
+        setShouldRedirectToCheckout(false);
+
+        // Only redirect if user is NOT already Pro
+        if (!profile.is_pro) {
+          setUpgradeLoading(true);
+          try {
+            const response = await fetch('/api/checkout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: user.id }),
+            });
+
+            const { url, error } = await response.json();
+
+            if (error) {
+              alert('Error creating checkout session. Please try again.');
+              setUpgradeLoading(false);
+              return;
+            }
+
+            if (url) {
+              window.location.href = url;
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error creating checkout session. Please try again.');
+            setUpgradeLoading(false);
+          }
+        }
+      }
+    };
+
+    redirectToCheckout();
+  }, [shouldRedirectToCheckout, user, loading, profile]);
 
   const getRandomRoast = () => {
     const randomIndex = Math.floor(Math.random() * roasts.length);
