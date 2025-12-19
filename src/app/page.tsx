@@ -40,6 +40,7 @@ export default function Home() {
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [anonymousCredits, setAnonymousCredits] = useState(3);
   const [shouldRedirectToCheckout, setShouldRedirectToCheckout] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     // Load anonymous credits from localStorage
@@ -243,9 +244,9 @@ export default function Home() {
         )}
       </div>
 
-      {/* Top right - Create Account button (only for anonymous users) */}
-      {!user && (
-        <div className="absolute top-8 right-8 z-20">
+      {/* Top right - Create Account or Profile button */}
+      <div className="absolute top-8 right-8 z-20">
+        {!user ? (
           <button
             onClick={() => {
               setAuthMode('create-account');
@@ -255,8 +256,16 @@ export default function Home() {
           >
             Create Account
           </button>
-        </div>
-      )}
+        ) : profile?.is_pro ? (
+          <button
+            onClick={() => setShowProfileModal(true)}
+            className="bg-white/10 backdrop-blur-lg px-4 py-2 rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white text-sm flex items-center gap-2"
+          >
+            <Crown size={16} className="text-yellow-500" />
+            My Profile
+          </button>
+        ) : null}
+      </div>
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -338,6 +347,74 @@ export default function Home() {
       <div className="absolute bottom-8 text-white/40 text-sm z-20">
         Press the button if you dare 🔥
       </div>
+
+      {/* Profile Modal (for Pro users) */}
+      {showProfileModal && user && profile?.is_pro && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-30 p-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileModal(false)}
+              className="absolute -top-4 -right-4 bg-white/10 backdrop-blur-lg p-2 rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white z-10"
+            >
+              ✕
+            </button>
+            <div className="bg-black/40 backdrop-blur-lg p-8 rounded-2xl border border-white/20 max-w-md w-full">
+              <div className="text-center mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown size={24} className="text-yellow-500" />
+                  <h2 className="text-2xl font-bold text-white">Pro Account</h2>
+                </div>
+                <p className="text-white/60">Manage your subscription</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Credits</div>
+                  <div className="text-white text-2xl font-bold">{profile.credits} / 100</div>
+                </div>
+
+                <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Status</div>
+                  <div className="text-green-400 font-bold">Active</div>
+                </div>
+
+                <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                  <div className="text-white/60 text-sm mb-1">Subscription</div>
+                  <div className="text-white">£9.99/month</div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (confirm('Are you sure you want to cancel your Pro subscription? You will lose access to Pro features.')) {
+                      try {
+                        const response = await fetch('/api/cancel-subscription', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userId: user.id }),
+                        });
+
+                        if (response.ok) {
+                          alert('Subscription cancelled successfully. You will retain access until the end of your billing period.');
+                          setShowProfileModal(false);
+                          await refreshProfile();
+                        } else {
+                          alert('Failed to cancel subscription. Please try again or contact support.');
+                        }
+                      } catch (error) {
+                        console.error('Error cancelling subscription:', error);
+                        alert('Failed to cancel subscription. Please try again.');
+                      }
+                    }
+                  }}
+                  className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-3 px-4 rounded-lg border border-red-500/50 transition-colors"
+                >
+                  Cancel Subscription
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
