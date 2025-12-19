@@ -38,10 +38,13 @@ export default function ResetPasswordPage() {
 
       if (error) throw error;
 
+      // Sign out user for security - they must log in with new password
+      await supabase.auth.signOut();
+
       setSuccess(true);
       setTimeout(() => {
         router.push('/');
-      }, 2000);
+      }, 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
@@ -66,12 +69,16 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        <div className="relative z-20 w-full max-w-md mx-auto p-8 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
-          <h2 className="text-3xl font-bold text-white text-center mb-2">
+        <div className="relative z-20 w-full max-w-md mx-auto p-8 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 text-center">
+          <div className="mb-4 text-green-400 text-6xl">✓</div>
+          <h2 className="text-3xl font-bold text-white mb-2">
             Password Reset Successful
           </h2>
-          <p className="text-white/60 text-center mb-6">
-            Redirecting you to the app...
+          <p className="text-white/60 mb-6">
+            Your password has been changed. Please sign in with your new password.
+          </p>
+          <p className="text-white/40 text-sm">
+            Redirecting to sign in...
           </p>
         </div>
       </main>
