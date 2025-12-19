@@ -39,6 +39,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<'signup' | 'create-account'>('signup');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [anonymousCredits, setAnonymousCredits] = useState(3);
+  const [shouldRedirectToCheckout, setShouldRedirectToCheckout] = useState(false);
 
   useEffect(() => {
     // Load anonymous credits from localStorage
@@ -47,6 +48,14 @@ export default function Home() {
       setAnonymousCredits(parseInt(savedCredits, 10));
     }
   }, []);
+
+  // Handle redirect to checkout after signup
+  useEffect(() => {
+    if (shouldRedirectToCheckout && user && !loading) {
+      setShouldRedirectToCheckout(false);
+      handleUpgrade();
+    }
+  }, [shouldRedirectToCheckout, user, loading]);
 
   const getRandomRoast = () => {
     const randomIndex = Math.floor(Math.random() * roasts.length);
@@ -237,8 +246,8 @@ export default function Home() {
                 onSuccess={() => {
                   setShowAuthModal(false);
                   if (authMode === 'signup') {
-                    // After signup for upgrade, redirect to checkout
-                    setTimeout(() => handleUpgrade(), 500);
+                    // After signup for upgrade, set flag to redirect to checkout
+                    setShouldRedirectToCheckout(true);
                   }
                 }}
               />
