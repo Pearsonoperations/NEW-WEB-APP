@@ -75,10 +75,10 @@ export default function ResetPasswordPage() {
             Password Reset Successful
           </h2>
           <p className="text-white/60 mb-6">
-            Your password has been changed. Please sign in with your new password.
+            Your password has been changed.
           </p>
           <p className="text-white/40 text-sm">
-            Redirecting to sign in...
+            Redirecting...
           </p>
         </div>
       </main>
