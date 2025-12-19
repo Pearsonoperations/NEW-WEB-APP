@@ -13,15 +13,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    // Get user email from Supabase
+    // Get user email from Supabase auth
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', userId)
-      .single();
+    const { data: { user } } = await supabase.auth.admin.getUserById(userId);
 
-    if (!profile) {
+    if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
@@ -37,7 +33,7 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       success_url: `${req.nextUrl.origin}?success=true`,
       cancel_url: `${req.nextUrl.origin}?canceled=true`,
-      customer_email: profile.email,
+      customer_email: user.email,
       client_reference_id: userId,
       metadata: {
         userId,
