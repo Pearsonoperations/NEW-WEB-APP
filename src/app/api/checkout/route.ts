@@ -40,6 +40,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Save the customer ID to Supabase if session has a customer
+    if (session.customer) {
+      await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: session.customer as string })
+        .eq('id', userId);
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);

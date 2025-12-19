@@ -27,46 +27,50 @@ export async function POST(req: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId || session.client_reference_id;
+        const customerId = session.customer as string;
 
         if (userId) {
-          // Upgrade user to Pro with 100 credits
-          await supabase
+          // Upgrade user to Pro with 100 credits and save customer ID
+          const { data, error } = await supabase
             .from('profiles')
             .update({
               is_pro: true,
               credits: 100,
+              stripe_customer_id: customerId,
             })
-            .eq('id', userId);
+            .eq('id', userId)
+            .select();
 
-          console.log(`User ${userId} upgraded to Pro`);
+          if (error) {
+            console.error(`Error upgrading user ${userId}:`, error);
+          } else {
+            console.log(`User ${userId} upgraded to Pro with customer ${customerId}`, data);
+          }
         }
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        const customer = subscription.customer as string;
+        const customerId = subscription.customer as string;
 
-        // Find user by customer ID and downgrade
-        const stripeCustomer = await stripe.customers.retrieve(customer);
-        if ('email' in stripeCustomer && stripeCustomer.email) {
-          const { data: profile } = await supabase
+        // Find user by Stripe customer ID and downgrade
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customerId)
+          .single();
+
+        if (profile) {
+          await supabase
             .from('profiles')
-            .select('id')
-            .eq('email', stripeCustomer.email)
-            .single();
+            .update({
+              is_pro: false,
+              credits: 3,
+            })
+            .eq('id', profile.id);
 
-          if (profile) {
-            await supabase
-              .from('profiles')
-              .update({
-                is_pro: false,
-                credits: 3,
-              })
-              .eq('id', profile.id);
-
-            console.log(`User ${profile.id} downgraded from Pro`);
-          }
+          console.log(`User ${profile.id} downgraded from Pro`);
         }
         break;
       }
@@ -76,24 +80,21 @@ export async function POST(req: NextRequest) {
 
         // Reset credits to 100 on successful recurring payment
         if (invoice.billing_reason === 'subscription_cycle') {
-          const customer = invoice.customer as string;
-          const stripeCustomer = await stripe.customers.retrieve(customer);
+          const customerId = invoice.customer as string;
 
-          if ('email' in stripeCustomer && stripeCustomer.email) {
-            const { data: profile } = await supabase
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('stripe_customer_id', customerId)
+            .single();
+
+          if (profile) {
+            await supabase
               .from('profiles')
-              .select('id')
-              .eq('email', stripeCustomer.email)
-              .single();
+              .update({ credits: 100 })
+              .eq('id', profile.id);
 
-            if (profile) {
-              await supabase
-                .from('profiles')
-                .update({ credits: 100 })
-                .eq('id', profile.id);
-
-              console.log(`Credits reset for user ${profile.id}`);
-            }
+            console.log(`Credits reset for user ${profile.id}`);
           }
         }
         break;
