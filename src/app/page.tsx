@@ -429,7 +429,7 @@ export default function Home() {
             >
               ✕
             </button>
-            <div className="bg-black/40 backdrop-blur-lg p-8 rounded-2xl border border-white/20 max-w-md w-full">
+            <div className="bg-black/40 backdrop-blur-lg p-10 rounded-2xl border border-white/20 max-w-2xl w-full">
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Crown size={24} className="text-yellow-500" />
