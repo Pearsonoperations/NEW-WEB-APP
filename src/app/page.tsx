@@ -422,14 +422,14 @@ export default function Home() {
       {/* Pricing Modal */}
       {showPricingModal && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-30 p-4">
-          <div className="relative">
+          <div className="relative w-full max-w-4xl px-4">
             <button
               onClick={() => setShowPricingModal(false)}
               className="absolute -top-4 -right-4 bg-white/10 backdrop-blur-lg p-2 rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white z-10"
             >
               ✕
             </button>
-            <div className="bg-black/40 backdrop-blur-lg p-10 rounded-2xl border border-white/20 max-w-2xl w-full">
+            <div className="bg-black/40 backdrop-blur-lg p-12 rounded-2xl border border-white/20 w-full">
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Crown size={24} className="text-yellow-500" />
