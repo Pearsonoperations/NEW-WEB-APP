@@ -178,16 +178,19 @@ export default function Home() {
 
       if (error) {
         alert('Error creating checkout session. Please try again.');
+        setUpgradeLoading(false);
         return;
       }
 
       if (url) {
+        // Don't reset loading state here - page will redirect
         window.location.href = url;
+      } else {
+        setUpgradeLoading(false);
       }
     } catch (error) {
       console.error('Error:', error);
       alert('Something went wrong. Please try again.');
-    } finally {
       setUpgradeLoading(false);
     }
   };
@@ -335,9 +338,15 @@ export default function Home() {
           )}
 
           {/* Upgrade to Pro button (shown when credits are low or used up) */}
-          {getCurrentCredits() === 0 && user && !profile?.is_pro && (
+          {getCurrentCredits() === 0 && !profile?.is_pro && (
             <button
-              onClick={() => setShowPricingModal(true)}
+              onClick={() => {
+                if (!user) {
+                  setShowAuthModal(true);
+                } else {
+                  setShowPricingModal(true);
+                }
+              }}
               className="mt-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold px-8 py-3 rounded-lg transition-all flex items-center gap-2"
             >
               <Crown size={20} />
