@@ -74,7 +74,7 @@ export function AuthForm({ onSuccess }: AuthFormProps = {}) {
       <div className="w-full max-w-md mx-auto p-8 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
         <h2 className="text-3xl font-bold text-white text-center mb-2">Check Your Email</h2>
         <p className="text-white/60 text-center mb-6">
-          We've sent a password reset link to {email}
+          We&apos;ve sent a password reset link to {email}
         </p>
         <button
           onClick={() => {
@@ -224,7 +224,7 @@ export function AuthForm({ onSuccess }: AuthFormProps = {}) {
         ) : (
           <>
             <span className="text-white/60 text-sm">
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              {isLogin ? "Don&apos;t have an account? " : 'Already have an account? '}
             </span>
             <button
               onClick={() => {

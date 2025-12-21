@@ -33,7 +33,6 @@ const roasts = [
 export default function Home() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [currentRoast, setCurrentRoast] = useState<string>('');
-  const [intensity, setIntensity] = useState<'mild' | 'savage'>('mild');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signup' | 'create-account'>('signup');
