@@ -4,10 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const STRIPE_PRICE_ID_YEARLY = 'price_1Sgsa5DifGnLLeYsAiOvgbFZ';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await req.json();
+    const { userId, billingPeriod = 'monthly' } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
@@ -21,12 +22,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Select the correct price ID based on billing period
+    const priceId = billingPeriod === 'yearly' ? STRIPE_PRICE_ID_YEARLY : STRIPE_PRICE_ID;
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: STRIPE_PRICE_ID,
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -37,6 +41,7 @@ export async function POST(req: NextRequest) {
       client_reference_id: userId,
       metadata: {
         userId,
+        billingPeriod,
       },
     });
 

@@ -40,6 +40,8 @@ export default function Home() {
   const [anonymousCredits, setAnonymousCredits] = useState(3);
   const [shouldRedirectToCheckout, setShouldRedirectToCheckout] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly'); // Default to yearly (better deal)
 
   useEffect(() => {
     // Load anonymous credits from localStorage
@@ -166,7 +168,10 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({
+          userId: user.id,
+          billingPeriod: billingPeriod
+        }),
       });
 
       const { url, error } = await response.json();
@@ -332,12 +337,11 @@ export default function Home() {
           {/* Upgrade to Pro button (shown when credits are low or used up) */}
           {getCurrentCredits() === 0 && user && !profile?.is_pro && (
             <button
-              onClick={handleUpgrade}
-              disabled={upgradeLoading}
-              className="mt-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-lg transition-all flex items-center gap-2"
+              onClick={() => setShowPricingModal(true)}
+              className="mt-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold px-8 py-3 rounded-lg transition-all flex items-center gap-2"
             >
               <Crown size={20} />
-              {upgradeLoading ? 'Loading...' : 'Upgrade to Pro - £9.99/month'}
+              Upgrade to Pro
             </button>
           )}
         </div>
@@ -410,6 +414,105 @@ export default function Home() {
                   Cancel Subscription
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pricing Modal */}
+      {showPricingModal && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-30 p-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowPricingModal(false)}
+              className="absolute -top-4 -right-4 bg-white/10 backdrop-blur-lg p-2 rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white z-10"
+            >
+              ✕
+            </button>
+            <div className="bg-black/40 backdrop-blur-lg p-8 rounded-2xl border border-white/20 max-w-md w-full">
+              <div className="text-center mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown size={24} className="text-yellow-500" />
+                  <h2 className="text-2xl font-bold text-white">Upgrade to Pro</h2>
+                </div>
+                <p className="text-white/60">Get 100 credits per month</p>
+              </div>
+
+              {/* Billing Period Toggle */}
+              <div className="flex items-center justify-center gap-4 mb-6 bg-white/5 p-1 rounded-lg">
+                <button
+                  onClick={() => setBillingPeriod('monthly')}
+                  className={`flex-1 py-2 px-4 rounded-md transition-all ${
+                    billingPeriod === 'monthly'
+                      ? 'bg-orange-500 text-white font-bold'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBillingPeriod('yearly')}
+                  className={`flex-1 py-2 px-4 rounded-md transition-all relative ${
+                    billingPeriod === 'yearly'
+                      ? 'bg-orange-500 text-white font-bold'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  Yearly
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    25% OFF
+                  </span>
+                </button>
+              </div>
+
+              {/* Pricing Display */}
+              <div className="bg-white/5 p-6 rounded-lg border border-white/10 mb-6 text-center">
+                <div className="text-white/60 text-sm mb-2">
+                  {billingPeriod === 'monthly' ? 'Monthly' : 'Yearly'}
+                </div>
+                <div className="text-white text-4xl font-bold mb-1">
+                  £{billingPeriod === 'monthly' ? '9.99' : '89.99'}
+                </div>
+                <div className="text-white/60 text-sm">
+                  {billingPeriod === 'yearly' && (
+                    <>
+                      <span className="line-through text-white/40">£119.88</span>
+                      <span className="ml-2 text-green-400">Save £29.89/year</span>
+                    </>
+                  )}
+                  {billingPeriod === 'monthly' && 'per month'}
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2 text-white/80">
+                  <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-green-400 text-xs">✓</span>
+                  </div>
+                  <span>100 roasts per month</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-green-400 text-xs">✓</span>
+                  </div>
+                  <span>Unlimited savage mode</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-green-400 text-xs">✓</span>
+                  </div>
+                  <span>Cancel anytime</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleUpgrade}
+                disabled={upgradeLoading}
+                className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-lg transition-all"
+              >
+                {upgradeLoading ? 'Loading...' : `Subscribe ${billingPeriod === 'monthly' ? 'Monthly' : 'Yearly'}`}
+              </button>
             </div>
           </div>
         </div>
