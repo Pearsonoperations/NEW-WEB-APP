@@ -535,6 +535,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={async () => {
+                      if (!user) return;
                       try {
                         const response = await fetch('/api/cancel-subscription', {
                           method: 'POST',
