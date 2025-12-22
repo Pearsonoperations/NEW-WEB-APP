@@ -51,6 +51,13 @@ export default function Home() {
     }
   }, []);
 
+  // Reset loading state when pricing modal opens
+  useEffect(() => {
+    if (showPricingModal) {
+      setUpgradeLoading(false);
+    }
+  }, [showPricingModal]);
+
   // Handle redirect to checkout after signup
   useEffect(() => {
     const redirectToCheckout = async () => {
@@ -156,6 +163,7 @@ export default function Home() {
 
   const handleUpgrade = async () => {
     if (!user) {
+      setShowPricingModal(false);
       setAuthMode('signup');
       setShowAuthModal(true);
       return;
