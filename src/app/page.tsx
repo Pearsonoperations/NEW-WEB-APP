@@ -524,7 +524,7 @@ export default function Home() {
               <>
                 <h2 className="text-2xl font-bold text-white mb-4">Cancel Pro subscription?</h2>
                 <p className="text-white/80 mb-6">
-                  You'll keep access until end of billing period
+                  You&apos;ll keep access until end of billing period
                 </p>
                 <div className="flex gap-3">
                   <button
