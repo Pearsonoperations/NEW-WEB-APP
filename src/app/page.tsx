@@ -42,6 +42,7 @@ export default function Home() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly'); // Default to yearly (better deal)
 
   useEffect(() => {
@@ -519,43 +520,63 @@ export default function Home() {
       {showCancelModal && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40 p-4">
           <div className="bg-black/40 backdrop-blur-lg p-8 rounded-2xl border border-white/20 max-w-md w-full">
-            <h2 className="text-2xl font-bold text-white mb-4">Cancel Subscription?</h2>
-            <p className="text-white/80 mb-6">
-              Are you sure you want to cancel your Pro subscription? You will lose access to Pro features at the end of your billing period.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-4 rounded-lg transition-all"
-              >
-                Keep Subscription
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch('/api/cancel-subscription', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ userId: user.id }),
-                    });
+            {!cancelSuccess ? (
+              <>
+                <h2 className="text-2xl font-bold text-white mb-4">Cancel Pro subscription?</h2>
+                <p className="text-white/80 mb-6">
+                  You'll keep access until end of billing period
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-4 rounded-lg transition-all"
+                  >
+                    Keep Subscription
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/cancel-subscription', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userId: user.id }),
+                        });
 
-                    if (response.ok) {
-                      setShowCancelModal(false);
-                      setShowProfileModal(false);
-                      await refreshProfile();
-                    } else {
-                      alert('Failed to cancel subscription. Please try again or contact support.');
-                    }
-                  } catch (error) {
-                    console.error('Error cancelling subscription:', error);
-                    alert('Failed to cancel subscription. Please try again.');
-                  }
-                }}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-all"
-              >
-                Cancel Subscription
-              </button>
-            </div>
+                        if (response.ok) {
+                          setCancelSuccess(true);
+                          await refreshProfile();
+                        } else {
+                          alert('Failed to cancel subscription. Please try again or contact support.');
+                        }
+                      } catch (error) {
+                        console.error('Error cancelling subscription:', error);
+                        alert('Failed to cancel subscription. Please try again.');
+                      }
+                    }}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-all"
+                  >
+                    Cancel Subscription
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold text-white mb-4">Subscription Cancelled</h2>
+                <p className="text-white/80 mb-6">
+                  You have successfully cancelled your subscription. You will maintain access until the end of your billing period.
+                </p>
+                <button
+                  onClick={() => {
+                    setCancelSuccess(false);
+                    setShowCancelModal(false);
+                    setShowProfileModal(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold py-3 px-4 rounded-lg transition-all"
+                >
+                  OK
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
